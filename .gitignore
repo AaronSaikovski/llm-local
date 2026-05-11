@@ -1,0 +1,6 @@
+# Logs directory
+.ollama/
+
+.claude/
+
+CLAUDE.md
