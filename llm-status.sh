@@ -111,17 +111,22 @@ render() {
     fi
   fi
 
-  # ── Ollama request activity ────────────────────────────────
+  # ── Ollama config (live) ──────────────────────────────────
   echo ""
-  echo -e "${YELLOW}Recent Activity (last 5 requests)${NC}"
-  LOG="$HOME/.ollama/logs/server.log"
-  if [ -f "$LOG" ]; then
-    grep -i "request\|generate\|agent" "$LOG" 2>/dev/null | tail -5 | while IFS= read -r line; do
+  echo -e "${YELLOW}Ollama Config (live)${NC}"
+  CONTEXT_LENGTH=$(ollama ps 2>/dev/null | tail -n +2 | awk "{print \$7}" | head -1)
+  KEEP_ALIVE_VAL=$(ollama ps 2>/dev/null | tail -n +2 | awk "{NF-=0; print \$NF, \$(NF-1), \$(NF-2)}" | head -1)
+  echo -e "  CONTEXT_LENGTH:      ${GREEN}${OLLAMA_CONTEXT_LENGTH:-not set}${NC}"
+  echo -e "  KEEP_ALIVE:          ${GREEN}${OLLAMA_KEEP_ALIVE:-not set}${NC}"
+  echo -e "  NUM_PARALLEL:        ${GREEN}${OLLAMA_NUM_PARALLEL:-not set}${NC}"
+  echo -e "  MAX_LOADED_MODELS:   ${GREEN}${OLLAMA_MAX_LOADED_MODELS:-not set}${NC}"
+
+  # ── Recent Ollama Activity ─────────────────────────────────
+  echo ""
+  echo -e "${YELLOW}Recent Ollama Activity${NC}"
+  log show --predicate 'process == "ollama" && messageType == 0'     --style compact --last 2m 2>/dev/null     | grep -iE "request|generate|model|inference|loaded|slot"     | grep -vE "Metal|TCC|compiler|shader"     | tail -5     | while IFS= read -r line; do
       echo "  $line"
-    done
-  else
-    echo -e "  ${YELLOW}(no log file found)${NC}"
-  fi
+    done || echo -e "  ${YELLOW}(no recent activity)${NC}"
 
   # ── Memory ────────────────────────────────────────────────
   echo ""

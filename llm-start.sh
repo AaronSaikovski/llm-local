@@ -127,7 +127,13 @@ echo -e "${YELLOW}▶ Starting Ollama...${NC}"
 if pgrep -x "ollama" > /dev/null; then
   echo -e "${GREEN}✓ Ollama already running${NC}"
 else
-  ollama serve >> "$OLLAMA_LOG" 2>&1 &
+  OLLAMA_USE_MLX=$OLLAMA_USE_MLX \
+    OLLAMA_NUM_GPU=$OLLAMA_NUM_GPU \
+    OLLAMA_NUM_PARALLEL=$OLLAMA_NUM_PARALLEL \
+    OLLAMA_MAX_LOADED_MODELS=$OLLAMA_MAX_LOADED_MODELS \
+    OLLAMA_NUM_CTX=$OLLAMA_NUM_CTX \
+    OLLAMA_KEEP_ALIVE=$OLLAMA_KEEP_ALIVE \
+    ollama serve >> "$OLLAMA_LOG" 2>&1 &
 
   echo -n "  Waiting for Ollama to be ready"
   for i in {1..15}; do
